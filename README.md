@@ -3,7 +3,7 @@ DDPG Tensorflow
 
 This repository provides an updated version of the DDPG implementation published in the official keras [website](https://keras.io/examples/rl/ddpg_pendulum/) that works with the new [Gymnasium](https://gymnasium.farama.org/content/gym_compatibility/) API (formerly known as `gym`).
 
-The notebook is also adapted into a python module for use in integrated pipelines.
+An extended implementation of the DDPG algorithm is also provided as a python module.
 
 Project Organization
 -----------
