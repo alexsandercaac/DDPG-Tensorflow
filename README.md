@@ -1,10 +1,13 @@
 DDPG Tensorflow
 ==============================
 
-Playground for experimenting with stablebaselines environments and a Tensorflow-based DDPG implementation.
+This repository provides an updated version of the DDPG implementation published in the official keras [website](https://keras.io/examples/rl/ddpg_pendulum/) that works with the new [Gymnasium](https://gymnasium.farama.org/content/gym_compatibility/) API (formerly known as `gym`).
+
+The notebook is also adapted into a python module for use in integrated pipelines.
 
 Project Organization
-------------
+-----------
+***
 
     ├── LICENSE
     ├── README.md          <- The top-level README for developers using this project.
