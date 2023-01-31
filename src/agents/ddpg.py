@@ -130,7 +130,7 @@ class DDPG(object):
 
     def fit(self, steps, max_steps_per_ep=np.Inf, visualize=False,
             log_freq=25, warm_up=50, verbose=1, clip_grad=True,
-            eval_epochs=100, performance_th=np.Inf, grad_norm=5,
+            eval_epochs=10, performance_th=np.Inf, grad_norm=5,
             checkpoints=False, checkpoint_path='agents/'):
 
         # To store reward history of each episode
@@ -143,7 +143,7 @@ class DDPG(object):
 
         steps_taken = 0
         episode = 0
-        pbar = tqdm(total=steps, file=sys.stdout)
+        pbar = tqdm(total=steps)
         while steps_taken < steps:
 
             prev_state, _ = self.env.reset()
@@ -184,7 +184,8 @@ class DDPG(object):
             episode += 1
             self.act_noise.reset()
             if (episode % log_freq == 0) and (episode != 0):
-                print(f"\nEpisode: {episode}")
+                if verbose > 0:
+                    print(f"\nEpisode: {episode}")
                 score = self.log_optimization_info(verbose)
 
                 if checkpoints:
@@ -193,7 +194,8 @@ class DDPG(object):
                     self.save_critic_weights(checkpoint_path +
                                              "checkpoint_critic.hdf5")
                 if score > performance_th:
-                    print("\nPerformance goal reached!! :)")
+                    if verbose > 0:
+                        print("\nPerformance goal reached!! :)")
                     break
 
         if visualize:
@@ -212,12 +214,13 @@ class DDPG(object):
 
         episode_rewards_list = []
         episode_len_list = []
+        pbar = tqdm(total=episodes, file=sys.stdout)
         for _ in range(episodes):
             episode_rewards = []
             steps = 0
             done = False
             obs, _ = self.env.reset()
-
+            pbar.update(1)
             while not done:
                 if visualize:
                     self.env.render()
