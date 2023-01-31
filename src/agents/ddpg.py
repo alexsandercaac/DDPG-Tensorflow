@@ -146,7 +146,7 @@ class DDPG(object):
         pbar = tqdm(total=steps, file=sys.stdout)
         while steps_taken < steps:
 
-            prev_state = self.env.reset()
+            prev_state, _ = self.env.reset()
             done = False
             ep_steps = 0
             while not done:
@@ -154,7 +154,8 @@ class DDPG(object):
                     self.env.render()
                 action = self.policy(prev_state)
 
-                state, reward, done, _ = self.env.step(action)
+                state, reward, terminated, truncated, _ = self.env.step(action)
+                done = terminated or truncated
                 steps_taken += 1
                 ep_steps += 1
                 pbar.update(1)
@@ -215,14 +216,15 @@ class DDPG(object):
             episode_rewards = []
             steps = 0
             done = False
-            obs = self.env.reset()
+            obs, _ = self.env.reset()
 
             while not done:
                 if visualize:
                     self.env.render()
                 action = self.policy(obs.reshape(1, self.buffer.num_states),
                                      training=False)
-                obs, reward, done, _ = self.env.step(action)
+                _, reward, terminated, truncated, _ = self.env.step(action)
+                done = terminated or truncated
                 steps += 1
                 episode_rewards.append(reward)
             episode_rewards_list.append(sum(episode_rewards))
