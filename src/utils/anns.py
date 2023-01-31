@@ -9,6 +9,8 @@ def actor(num_states: int, num_actions: int, lr: float = 1e-3
     """
     Actor ANN for the DDPG algorithm.
 
+    Inspired by the network architecture in the keras DDPG example.
+
     Args:
         num_states (int): Number of states.
         num_actions (int): Number of actions.
@@ -41,6 +43,9 @@ def critic(num_states: int, num_actions: int, lr: float = 1e-3
            ) -> tf.keras.Model:
     """
     Critic ANN for the DDPG algorithm.
+
+
+    Inspired by the network architecture in the keras DDPG example.
 
     Args:
         num_states (int): Number of states.
@@ -90,7 +95,7 @@ def critic(num_states: int, num_actions: int, lr: float = 1e-3
 def actor_bnorm(num_states: int, num_actions: int, lr: float = 1e-3
                 ) -> tf.keras.Model:
     """
-    Actor ANN for the DDPG algorithm.
+    Actor ANN for the DDPG algorithm, using batch normalization layers.
 
     Args:
         num_states (int): Number of states.
@@ -126,7 +131,7 @@ def actor_bnorm(num_states: int, num_actions: int, lr: float = 1e-3
 def critic_bnorm(num_states: int, num_actions: int, lr: float = 1e-3
                  ) -> tf.keras.Model:
     """
-    Critic ANN for the DDPG algorithm.
+    Critic ANN for the DDPG algorithm, using batch normalization layers.
 
     Args:
         num_states (int): Number of states.

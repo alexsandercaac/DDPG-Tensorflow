@@ -130,7 +130,7 @@ class DDPG(object):
 
     def fit(self, steps, max_steps_per_ep=np.Inf, visualize=False,
             log_freq=25, warm_up=50, verbose=1, clip_grad=True,
-            eval_epochs=10, performance_th=np.Inf, grad_norm=5,
+            eval_episodes=10, performance_th=np.Inf, grad_norm=5,
             checkpoints=False, checkpoint_path='agents/'):
 
         # To store reward history of each episode
@@ -139,7 +139,7 @@ class DDPG(object):
         self.act_grad_norm_list = [0] + [np.nan for _ in range(log_freq - 1)]
         self.actor_loss_list = [0] + [np.nan for _ in range(log_freq - 1)]
         self.critic_loss_list = [0] + [np.nan for _ in range(log_freq - 1)]
-        self.eval_epochs = eval_epochs
+        self.eval_episodes = eval_episodes
 
         steps_taken = 0
         episode = 0
@@ -221,7 +221,7 @@ class DDPG(object):
             done = False
             obs, _ = self.env.reset()
             action = self.policy(obs.reshape(1, self.buffer.num_states),
-                                     training=False)
+                                 training=False)
             pbar.update(1)
             while not done:
                 if visualize:
@@ -253,7 +253,7 @@ class DDPG(object):
         self.actor_loss_list.pop(0)
 
     def log_optimization_info(self, verbose):
-        mean_return, mean_len = self.evaluate(self.eval_epochs)
+        mean_return, mean_len = self.evaluate(self.eval_episodes)
         mean_crt_grad = np.nanmean(self.crt_grad_norm_list)
         mean_act_grad = np.nanmean(self.act_grad_norm_list)
         mean_crt_loss = np.nanmean(self.critic_loss_list)
