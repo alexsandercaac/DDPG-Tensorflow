@@ -220,13 +220,14 @@ class DDPG(object):
             steps = 0
             done = False
             obs, _ = self.env.reset()
+            action = self.policy(obs.reshape(1, self.buffer.num_states),
+                                     training=False)
             pbar.update(1)
             while not done:
                 if visualize:
                     self.env.render()
-                action = self.policy(obs.reshape(1, self.buffer.num_states),
-                                     training=False)
-                _, reward, terminated, truncated, _ = self.env.step(action)
+                state, reward, terminated, truncated, _ = self.env.step(action)
+                action = self.policy(state)
                 done = terminated or truncated
                 steps += 1
                 episode_rewards.append(reward)
