@@ -1,0 +1,11 @@
+stages:
+  gym_test:
+    cmd: python3 src/gym_test.py
+    deps: 
+    - src/gym_test.py
+    - src/utils/anns.py
+    - src/utils/action_noise.py
+    - src/utils/params.py
+    outs:
+    - models/actor_ddpg-${gym_test.environment}.hdf5
+    - models/critic_ddpg-${gym_test.environment}.hdf5

@@ -6,14 +6,29 @@ from agents.ddpg import DDPG
 from utils.anns import actor_bnorm, critic_bnorm
 from utils.action_noise import OUActionNoise
 from utils.buffer import Buffer
+from utils.params import get_params
 import gymnasium as gym
 import numpy as np
 
-# %% Learning rate for actor-critic models
-CRITIC_LR = 5e-4
-ACTOR_LR = 2e-4
-ENVIRONMENT = "Pendulum-v1"
+# %% Parameters
 
+params = get_params()
+
+CRITIC_LR = float(params["critic_lr"])
+ACTOR_LR = float(params["actor_lr"])
+ENVIRONMENT = str(params['environment'])
+SAVE_MODELS = bool(params['save_models'])
+BATCH_SIZE = int(float(params['batch_size']))
+BUFFER_CAPACITY = int(float(params['buffer_capacity']))
+SIGMA = float(params['sigma'])
+TAU = float(params['tau'])
+N_TRAINING_STEPS = int(float(params['n_training_steps']))
+WARM_UP_STEPS = int(float(params['warm_up_steps']))
+CLIP_GRADIENTS = bool(params['clip_gradients'])
+LOG_FREQ = int(float(params['log_freq']))
+EVAL_EPISODES = int(float(params['eval_episodes']))
+
+# %%
 env = gym.make(ENVIRONMENT)
 
 num_states = env.observation_space.shape[0]
@@ -29,22 +44,25 @@ print(f"Max, min value of action ->  {upper_bound}, {lower_bound}")
 actor_model = actor_bnorm(num_states, num_actions, ACTOR_LR)
 critic_model = critic_bnorm(num_states, num_actions, CRITIC_LR)
 
-buffer = Buffer(num_states, num_actions, batch_size=64,
-                buffer_capacity=int(50e3))
+buffer = Buffer(num_states, num_actions, batch_size=BATCH_SIZE,
+                buffer_capacity=int(BUFFER_CAPACITY))
 noise = OUActionNoise(mean=np.zeros(num_actions),
-                      sigma=float(0.2) * np.ones(num_actions))
+                      sigma=float(SIGMA) * np.ones(num_actions))
 ddpg = DDPG(env, buffer, actor_model, critic_model,
-            act_noise=noise, tau=3e-3)
+            act_noise=noise, tau=TAU)
 # ddpg.load_actor_weights(f"agents/actor_ddpg-{problem}.hdf5")
 # ddpg.load_critic_weights(f"agents/critic_ddpg-{problem}.hdf5")
 # %%
 
-hist = ddpg.fit(int(5e4), warm_up=1e3, clip_grad=True, log_freq=50,
-                eval_episodes=30)
-ret = ddpg.evaluate(30, visualize=False)
-print(ret)
-ddpg.env = gym.make("Pendulum-v1", render_mode="human")
+hist = ddpg.fit(int(N_TRAINING_STEPS), warm_up=WARM_UP_STEPS,
+                clip_grad=CLIP_GRADIENTS, log_freq=LOG_FREQ,
+                eval_episodes=EVAL_EPISODES)
+
+ret = ddpg.evaluate(EVAL_EPISODES, visualize=False)
+print("Evaluation:", ret)
+ddpg.env = gym.make(ENVIRONMENT, render_mode="human")
 ddpg.evaluate(2, visualize=True)
 
-ddpg.save_actor_weights(f"../models/actor_ddpg-{ENVIRONMENT}.hdf5")
-ddpg.save_critic_weights(f"../models/critic_ddpg-{ENVIRONMENT}.hdf5")
+if SAVE_MODELS:
+    ddpg.save_actor_weights(f"../models/actor_ddpg-{ENVIRONMENT}.hdf5")
+    ddpg.save_critic_weights(f"../models/critic_ddpg-{ENVIRONMENT}.hdf5")

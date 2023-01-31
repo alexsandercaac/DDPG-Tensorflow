@@ -133,3 +133,7 @@ ddpgtf
 
 # VSCode
 *.code-workspace
+
+# Model binaries
+*.hdf5
+*.h5
