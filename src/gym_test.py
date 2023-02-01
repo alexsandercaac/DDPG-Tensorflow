@@ -3,7 +3,7 @@
 """
 # %%
 from agents.ddpg import DDPG
-from utils.anns import actor_bnorm, critic_bnorm
+from utils.anns import actor_bnorm, critic_bnorm, actor, critic
 from utils.action_noise import OUActionNoise
 from utils.buffer import Buffer
 from utils.params import get_params
@@ -27,6 +27,7 @@ WARM_UP_STEPS = int(float(params['warm_up_steps']))
 CLIP_GRADIENTS = bool(params['clip_gradients'])
 LOG_FREQ = int(float(params['log_freq']))
 EVAL_EPISODES = int(float(params['eval_episodes']))
+BNORM = bool(params['bnorm'])
 
 # %%
 env = gym.make(ENVIRONMENT)
@@ -41,8 +42,12 @@ lower_bound = env.action_space.low[0]
 
 print(f"Max, min value of action ->  {upper_bound}, {lower_bound}")
 
-actor_model = actor_bnorm(num_states, num_actions, ACTOR_LR)
-critic_model = critic_bnorm(num_states, num_actions, CRITIC_LR)
+if BNORM:
+    actor_model = actor_bnorm(num_states, num_actions, ACTOR_LR)
+    critic_model = critic_bnorm(num_states, num_actions, CRITIC_LR)
+else:
+    actor_model = actor(num_states, num_actions, ACTOR_LR)
+    critic_model = critic(num_states, num_actions, CRITIC_LR)
 
 buffer = Buffer(num_states, num_actions, batch_size=BATCH_SIZE,
                 buffer_capacity=int(BUFFER_CAPACITY))

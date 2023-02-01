@@ -1,14 +1,15 @@
 gym_test:
   environment: "Pendulum-v1"
-  critic_lr: 5e-4
-  actor_lr: 1e-4
-  save_models: False
-  batch_size: 64
+  critic_lr: 1e-3
+  actor_lr: 5e-4
+  save_models: True
+  batch_size: 32
   buffer_capacity: 50e3
   sigma: 0.2
   tau: 3e-3
-  n_training_steps: 5e4
-  warm_up_steps: 1e3
+  n_training_steps: 100000
+  warm_up_steps: 1000
   clip_gradients: True
   log_freq: 50
   eval_episodes: 30
+  bnorm: False

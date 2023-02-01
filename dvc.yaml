@@ -9,3 +9,18 @@ stages:
     outs:
     - models/actor_ddpg-${gym_test.environment}.hdf5
     - models/critic_ddpg-${gym_test.environment}.hdf5
+    params:
+    - gym_test.environment
+    - gym_test.critic_lr
+    - gym_test.actor_lr
+    - gym_test.save_models
+    - gym_test.batch_size
+    - gym_test.buffer_capacity
+    - gym_test.sigma
+    - gym_test.tau
+    - gym_test.n_training_steps
+    - gym_test.warm_up_steps
+    - gym_test.clip_gradients
+    - gym_test.log_freq
+    - gym_test.eval_episodes
+    - gym_test.bnorm
