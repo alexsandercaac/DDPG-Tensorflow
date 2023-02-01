@@ -12,5 +12,5 @@ gym_test:
   clip_gradients: True
   log_freq: 10
   eval_episodes: 100
-  bnorm: False
+  bnorm: True
   save_best: True
