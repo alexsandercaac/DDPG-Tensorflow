@@ -24,3 +24,6 @@ stages:
     - gym_test.log_freq
     - gym_test.eval_episodes
     - gym_test.bnorm
+    metrics:
+    - evaluation/metrics_ddpg-${gym_test.environment}.json:
+        cache: False
