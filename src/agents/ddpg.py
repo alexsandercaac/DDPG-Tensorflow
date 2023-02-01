@@ -37,6 +37,7 @@ class DDPG(object):
         self.actor_loss_list = [0]
         self.critic_loss_list = [0]
         self.best_avg_reward = -np.inf
+        self.eval_episodes = None
 
         if not hasattr(actor, "optimizer"):
             raise ValueError('Actor must have an optimizer')
