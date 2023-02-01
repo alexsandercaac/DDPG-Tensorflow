@@ -69,9 +69,10 @@ if SAVE_BEST:
     ddpg.target_actor.set_weights(ddpg.best_actor_weights)
     ddpg.target_critic.set_weights(ddpg.best_critic_weights)
 
-ret = ddpg.evaluate(EVAL_EPISODES, visualize=False)
+ret = ddpg.evaluate(2*EVAL_EPISODES, visualize=False)
 print("Evaluation:", ret)
-metrics = {'mean_reward': ret[0], 'mean_episode_length': ret[1]}
+metrics = {'mean_reward': ret[0], 'std_reward': ret[1],
+           'mean_episode_length': ret[2]}
 with open(f"evaluation/metrics_ddpg-{ENVIRONMENT}.json", 'w') as f:
     json.dump(metrics, f)
 

@@ -6,6 +6,7 @@ stages:
     - src/utils/anns.py
     - src/utils/action_noise.py
     - src/utils/params.py
+    - src/agents/ddpg.py
     outs:
     - models/actor_ddpg-${gym_test.environment}.hdf5
     - models/critic_ddpg-${gym_test.environment}.hdf5

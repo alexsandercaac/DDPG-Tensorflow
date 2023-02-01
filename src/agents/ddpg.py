@@ -139,7 +139,7 @@ class DDPG(object):
             keep_best: bool = True):
 
         # To store reward history of each episode
-        self.hist = {'mean_returns': [], 'mean_lens': []}
+        self.hist = {'mean_returns': [], 'std_returns': [], 'mean_lens': []}
         self.crt_grad_norm_list = [0] + [np.nan for _ in range(log_freq - 1)]
         self.act_grad_norm_list = [0] + [np.nan for _ in range(log_freq - 1)]
         self.actor_loss_list = [0] + [np.nan for _ in range(log_freq - 1)]
@@ -243,8 +243,9 @@ class DDPG(object):
         if visualize:
             self.env.close()
         mean_episode_reward = np.mean(episode_rewards_list)
+        std_episode_reward = np.std(episode_rewards_list)
         mean_episode_len = np.mean(episode_len_list)
-        return mean_episode_reward, mean_episode_len
+        return mean_episode_reward, std_episode_reward, mean_episode_len
 
     def manage_optimization_lists(self, crt_grad_norm, act_grad_norm, crt_loss,
                                   act_loss):
@@ -259,16 +260,18 @@ class DDPG(object):
         self.actor_loss_list.pop(0)
 
     def log_optimization_info(self, verbose):
-        mean_return, mean_len = self.evaluate(self.eval_episodes)
+        mean_return, std_return, mean_len = self.evaluate(self.eval_episodes)
         mean_crt_grad = np.nanmean(self.crt_grad_norm_list)
         mean_act_grad = np.nanmean(self.act_grad_norm_list)
         mean_crt_loss = np.nanmean(self.critic_loss_list)
         mean_act_loss = np.nanmean(self.actor_loss_list)
         self.hist['mean_returns'].append(mean_return)
+        self.hist['std_returns'].append(std_return)
         self.hist['mean_lens'].append(mean_len)
         if verbose > 0:
             tqdm.write("\n-----------------------------------\n" +
                        f"\nMean return: {mean_return:.2f}" +
+                       f"\nStd return: {std_return:.2}" +
                        f"\nMean length: {mean_len:.2f}" +
                        "\nCritic gradient norm: " +
                        f"{mean_crt_grad:.2e}" +
