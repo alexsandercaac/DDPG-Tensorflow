@@ -266,7 +266,7 @@ class DDPG(object):
         self.actor_loss_list.pop(0)
 
     def log_optimization_info(self, verbose):
-        mean_return, std_return, mean_len, _ = self.evaluate(
+        mean_return, std_return, mean_len = self.evaluate(
             self.eval_episodes)
         mean_crt_grad = np.nanmean(self.crt_grad_norm_list)
         mean_act_grad = np.nanmean(self.act_grad_norm_list)

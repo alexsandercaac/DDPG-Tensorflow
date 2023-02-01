@@ -28,3 +28,15 @@ stages:
     metrics:
     - evaluation/metrics_ddpg-${gym_test.environment}.json:
         cache: False
+  render:
+    cmd: python3 src/render.py
+    deps:
+    - src/render.py
+    - models/actor_ddpg-${gym_test.environment}.hdf5
+    - models/critic_ddpg-${gym_test.environment}.hdf5
+    - src/utils/visualization.py
+    outs:
+    - evaluation/${gym_test.environment}.gif
+    params:
+    - gym_test.bnorm
+    - gym_test.environment
