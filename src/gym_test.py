@@ -64,5 +64,5 @@ ddpg.env = gym.make(ENVIRONMENT, render_mode="human")
 ddpg.evaluate(2, visualize=True)
 
 if SAVE_MODELS:
-    ddpg.save_actor_weights(f"../models/actor_ddpg-{ENVIRONMENT}.hdf5")
-    ddpg.save_critic_weights(f"../models/critic_ddpg-{ENVIRONMENT}.hdf5")
+    ddpg.save_actor_weights(f"models/actor_ddpg-{ENVIRONMENT}.hdf5")
+    ddpg.save_critic_weights(f"models/critic_ddpg-{ENVIRONMENT}.hdf5")
