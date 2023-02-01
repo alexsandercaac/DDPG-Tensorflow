@@ -6,7 +6,7 @@ import sys
 import os
 
 
-def get_params():
+def get_params(stage_fn: str = None):
     """
     Reads parameters for a given DVC stage from params.yaml.
 
@@ -16,8 +16,8 @@ def get_params():
     :returns params: dict with parameters for the stage
     :raises KeyError: if the stage name is not found in params.yaml
     """
-
-    stage_fn = os.path.basename(sys.argv[0]).replace(".py", "")
+    if stage_fn is None:
+        stage_fn = os.path.basename(sys.argv[0]).replace(".py", "")
 
     try:
         params = yaml.safe_load(open("params.yaml"))[stage_fn]
