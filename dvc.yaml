@@ -35,8 +35,9 @@ stages:
     - models/actor_ddpg-${gym_test.environment}.hdf5
     - models/critic_ddpg-${gym_test.environment}.hdf5
     - src/utils/visualization.py
-    outs:
-    - evaluation/${gym_test.environment}.gif
+    plots:
+    - evaluation/${gym_test.environment}.gif:
+        cache: false
     params:
     - gym_test.bnorm
     - gym_test.environment
