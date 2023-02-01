@@ -36,16 +36,19 @@ class DDPG(object):
         self.act_grad_norm_list = [0]
         self.actor_loss_list = [0]
         self.critic_loss_list = [0]
+        self.best_avg_reward = -np.inf
 
         if not hasattr(actor, "optimizer"):
             raise ValueError('Actor must have an optimizer')
         self.actor_model = actor
         self.target_actor = tf.keras.models.clone_model(actor)
+        self.best_actor_weights = actor.get_weights()
 
         if not hasattr(critic, "optimizer"):
             raise ValueError('Critic must have an optimizer')
         self.critic_model = critic
         self.target_critic = tf.keras.models.clone_model(critic)
+        self.best_critic_weights = critic.get_weights()
 
     def policy(self, state, training=True):
         """
@@ -128,10 +131,11 @@ class DDPG(object):
         )
         return crt_norm, act_norm, critic_loss, actor_loss
 
-    def fit(self, steps, max_steps_per_ep=np.Inf, visualize=False,
-            log_freq=25, warm_up=50, verbose=1, clip_grad=True,
+    def fit(self, steps, max_steps_per_ep=np.Inf, log_freq=25,
+            warm_up=50, verbose=1, clip_grad=True,
             eval_episodes=10, performance_th=np.Inf, grad_norm=5,
-            checkpoints=False, checkpoint_path='agents/'):
+            checkpoints=False, checkpoint_path='agents/',
+            keep_best: bool = True):
 
         # To store reward history of each episode
         self.hist = {'mean_returns': [], 'mean_lens': []}
@@ -150,8 +154,7 @@ class DDPG(object):
             done = False
             ep_steps = 0
             while not done:
-                if visualize:
-                    self.env.render()
+
                 action = self.policy(prev_state)
 
                 state, reward, terminated, truncated, _ = self.env.step(action)
@@ -187,6 +190,10 @@ class DDPG(object):
                 if verbose > 0:
                     print(f"\nEpisode: {episode}")
                 score = self.log_optimization_info(verbose)
+                if score >= self.best_avg_reward and keep_best:
+                    self.best_avg_reward = score
+                    self.best_actor_weights = self.target_actor.get_weights()
+                    self.best_critic_weights = self.target_critic.get_weights()
 
                 if checkpoints:
                     self.save_actor_weights(checkpoint_path +
@@ -198,8 +205,6 @@ class DDPG(object):
                         print("\nPerformance goal reached!! :)")
                     break
 
-        if visualize:
-            self.env.close()
         pbar.close()
         return self.hist
 
