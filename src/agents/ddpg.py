@@ -220,6 +220,8 @@ class DDPG(object):
 
         episode_rewards_list = []
         episode_len_list = []
+        if visualize:
+            frames = []
         pbar = tqdm(total=episodes, file=sys.stdout)
         for _ in range(episodes):
             episode_rewards = []
@@ -231,7 +233,7 @@ class DDPG(object):
             pbar.update(1)
             while not done:
                 if visualize:
-                    self.env.render()
+                    frames.append(self.env.render())
                 state, reward, terminated, truncated, _ = self.env.step(action)
                 action = self.policy(state)
                 done = terminated or truncated
@@ -245,7 +247,11 @@ class DDPG(object):
         mean_episode_reward = np.mean(episode_rewards_list)
         std_episode_reward = np.std(episode_rewards_list)
         mean_episode_len = np.mean(episode_len_list)
-        return mean_episode_reward, std_episode_reward, mean_episode_len
+        if visualize:
+            return (mean_episode_reward, std_episode_reward, mean_episode_len,
+                    frames)
+        else:
+            return mean_episode_reward, std_episode_reward, mean_episode_len
 
     def manage_optimization_lists(self, crt_grad_norm, act_grad_norm, crt_loss,
                                   act_loss):
@@ -260,7 +266,8 @@ class DDPG(object):
         self.actor_loss_list.pop(0)
 
     def log_optimization_info(self, verbose):
-        mean_return, std_return, mean_len = self.evaluate(self.eval_episodes)
+        mean_return, std_return, mean_len, _ = self.evaluate(
+            self.eval_episodes)
         mean_crt_grad = np.nanmean(self.crt_grad_norm_list)
         mean_act_grad = np.nanmean(self.act_grad_norm_list)
         mean_crt_loss = np.nanmean(self.critic_loss_list)
