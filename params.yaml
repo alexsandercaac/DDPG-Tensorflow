@@ -3,14 +3,14 @@ gym_test:
   critic_lr: 6e-4
   actor_lr: 2e-4
   save_models: True
-  batch_size: 128
+  batch_size: 64
   buffer_capacity: 40e3
   sigma: 0.2
   tau: 3e-3
-  n_training_steps: 25000
+  n_training_steps: 20000
   warm_up_steps: 1000
   clip_gradients: True
   log_freq: 10
-  eval_episodes: 100
+  eval_episodes: 30
   bnorm: True
-  save_best: True
+  save_best: False
