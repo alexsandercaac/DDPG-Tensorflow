@@ -13,7 +13,7 @@ stages:
       md5: 2dcad8ca3d471886a471755affe96256
       size: 2506
     - path: src/utils/anns.py
-      md5: 34665d66dae95cbced3823bec61fe993
+      md5: 6e4624d3a122b60eb477593739c98425
       size: 6712
     - path: src/utils/params.py
       md5: e2099913c896131b3a7a7844fff0652d
@@ -36,11 +36,11 @@ stages:
         gym_test.warm_up_steps: 1000
     outs:
     - path: evaluation/metrics_ddpg-Pendulum-v1.json
-      md5: 75fc7ea6d0e5f97ba7080d49c0196c54
-      size: 98
+      md5: 8290c8d4faf6ecb0b39eaf6ec27f7eca
+      size: 100
     - path: models/actor_ddpg-Pendulum-v1.hdf5
-      md5: 3d6361d3284954e2c84f79d7a6cbe18b
-      size: 63064
+      md5: acec4b5fa044c2e192ce4adb38489d78
+      size: 97912
     - path: models/critic_ddpg-Pendulum-v1.hdf5
-      md5: 34e101f09a7c39ee4ea953d98db2b22b
-      size: 257944
+      md5: 4ce90035fcb46192f3aff11144332df5
+      size: 171848

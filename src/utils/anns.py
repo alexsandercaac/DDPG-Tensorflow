@@ -113,7 +113,7 @@ def actor_bnorm(num_states: int, num_actions: int, lr: float = 1e-3
     bnorm1 = tf.keras.layers.BatchNormalization()(dense1)
     act1 = tf.keras.layers.Activation('relu')(bnorm1)
 
-    dense2 = tf.keras.layers.Dense(64, activation="linear")(act1)
+    dense2 = tf.keras.layers.Dense(128, activation="linear")(act1)
     bnorm2 = tf.keras.layers.BatchNormalization()(dense2)
     act2 = tf.keras.layers.Activation('relu')(bnorm2)
 
@@ -145,7 +145,7 @@ def critic_bnorm(num_states: int, num_actions: int, lr: float = 1e-3
     # State as input
     state_input = tf.keras.layers.Input(shape=(num_states))
     regularizer = tf.keras.regularizers.l2(1e-2)
-    state_dense1 = tf.keras.layers.Dense(128, activation="linear",
+    state_dense1 = tf.keras.layers.Dense(64, activation="linear",
                                          kernel_regularizer=regularizer
                                          )(state_input)
     state_bnorm1 = tf.keras.layers.BatchNormalization()(state_dense1)
@@ -167,7 +167,7 @@ def critic_bnorm(num_states: int, num_actions: int, lr: float = 1e-3
 
     dense1 = tf.keras.layers.Dense(128, activation="relu",
                                    kernel_regularizer=regularizer)(concat)
-    dense2 = tf.keras.layers.Dense(256, activation="relu",
+    dense2 = tf.keras.layers.Dense(128, activation="relu",
                                    kernel_regularizer=regularizer)(dense1)
     last_init = tf.random_uniform_initializer(minval=-0.003, maxval=0.003)
     outputs = tf.keras.layers.Dense(1, kernel_initializer=last_init)(dense2)
