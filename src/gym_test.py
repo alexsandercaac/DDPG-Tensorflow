@@ -9,6 +9,7 @@ from utils.buffer import Buffer
 from utils.params import get_params
 import gymnasium as gym
 import numpy as np
+import json
 
 # %% Parameters
 
@@ -28,6 +29,7 @@ CLIP_GRADIENTS = bool(params['clip_gradients'])
 LOG_FREQ = int(float(params['log_freq']))
 EVAL_EPISODES = int(float(params['eval_episodes']))
 BNORM = bool(params['bnorm'])
+SAVE_BEST = bool(params['save_best'])
 
 # %%
 env = gym.make(ENVIRONMENT)
@@ -63,8 +65,16 @@ hist = ddpg.fit(int(N_TRAINING_STEPS), warm_up=WARM_UP_STEPS,
                 clip_grad=CLIP_GRADIENTS, log_freq=LOG_FREQ,
                 eval_episodes=EVAL_EPISODES)
 
+if SAVE_BEST:
+    ddpg.target_actor.set_weights(ddpg.best_actor_weights)
+    ddpg.target_critic.set_weights(ddpg.best_critic_weights)
+
 ret = ddpg.evaluate(EVAL_EPISODES, visualize=False)
 print("Evaluation:", ret)
+metrics = {'mean_reward': ret[0], 'mean_episode_length': ret[1]}
+with open(f"evaluation/metrics_ddpg-{ENVIRONMENT}.json", 'w') as f:
+    json.dump(metrics, f)
+
 ddpg.env = gym.make(ENVIRONMENT, render_mode="human")
 ddpg.evaluate(2, visualize=True)
 
