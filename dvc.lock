@@ -29,29 +29,29 @@ stages:
         gym_test.environment: Pendulum-v1
         gym_test.eval_episodes: 30
         gym_test.log_freq: 10
-        gym_test.n_training_steps: 20000
+        gym_test.n_training_steps: 80000
         gym_test.save_models: true
         gym_test.sigma: 0.2
         gym_test.tau: 0.003
         gym_test.warm_up_steps: 1000
     outs:
     - path: evaluation/metrics_ddpg-Pendulum-v1.json
-      md5: 851d0b33879a907e3d235516e11817b8
+      md5: f8f054ff18b775b3eada0dcbcab6745a
       size: 98
     - path: models/actor_ddpg-Pendulum-v1.hdf5
-      md5: 50bc152b488288e00222742c5d51f122
+      md5: 4f438174bb6e813f621657c529283cec
       size: 97912
     - path: models/critic_ddpg-Pendulum-v1.hdf5
-      md5: 0f7fa7b6334945c2f42c76fdb61a4c2f
+      md5: 4e4e85d790eaa96bb1a2846c00869cfa
       size: 171848
   render:
     cmd: python3 src/render.py
     deps:
     - path: models/actor_ddpg-Pendulum-v1.hdf5
-      md5: 50bc152b488288e00222742c5d51f122
+      md5: 4f438174bb6e813f621657c529283cec
       size: 97912
     - path: models/critic_ddpg-Pendulum-v1.hdf5
-      md5: 0f7fa7b6334945c2f42c76fdb61a4c2f
+      md5: 4e4e85d790eaa96bb1a2846c00869cfa
       size: 171848
     - path: src/render.py
       md5: de2bffb05f97ef82f9cdd6ea4b0a0857
@@ -65,5 +65,5 @@ stages:
         gym_test.environment: Pendulum-v1
     outs:
     - path: evaluation/Pendulum-v1.gif
-      md5: 77dce1372b88303df2be83d391a40193
-      size: 374624
+      md5: b1b941dc8e5ecc007d17ff70f9b91fbb
+      size: 232035

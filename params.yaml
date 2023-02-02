@@ -7,7 +7,7 @@ gym_test:
   buffer_capacity: 40e3
   sigma: 0.2
   tau: 3e-3
-  n_training_steps: 20000
+  n_training_steps: 80000
   warm_up_steps: 1000
   clip_gradients: True
   log_freq: 10
