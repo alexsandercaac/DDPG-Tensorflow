@@ -3,7 +3,7 @@
 """
 import tensorflow as tf
 import numpy as np
-from tqdm import tqdm
+from tqdm.rich import tqdm
 import sys
 
 
