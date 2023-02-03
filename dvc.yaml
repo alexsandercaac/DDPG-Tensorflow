@@ -25,6 +25,8 @@ stages:
     - gym_test.log_freq
     - gym_test.eval_episodes
     - gym_test.bnorm
+    - gym_test.learn_freq
+    - gym_test.performance_th
     metrics:
     - evaluation/metrics_ddpg-${gym_test.environment}.json:
         cache: False
@@ -41,3 +43,27 @@ stages:
     params:
     - gym_test.bnorm
     - gym_test.environment
+  baseline:
+    cmd: python3 src/baseline.py
+    deps: 
+    - src/baseline.py
+    - src/utils/action_noise.py
+    - src/utils/params.py
+    outs:
+    - models/ddpg-${gym_test.environment}-baseline.zip
+    params:
+    - baseline.environment
+    - baseline.lr
+    - baseline.save_models
+    - baseline.batch_size
+    - baseline.buffer_capacity
+    - baseline.sigma
+    - baseline.tau
+    - baseline.n_training_steps
+    - baseline.log_freq
+    - baseline.eval_episodes
+    - baseline.warm_up_steps
+    - baseline.learn_freq
+    metrics:
+    - evaluation/metrics_ddpg-${gym_test.environment}-baseline.json:
+        cache: False

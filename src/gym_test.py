@@ -10,7 +10,7 @@ from utils.params import get_params
 import gymnasium as gym
 import numpy as np
 import json
-
+import time
 # %% Parameters
 
 params = get_params()
@@ -30,6 +30,8 @@ LOG_FREQ = int(float(params['log_freq']))
 EVAL_EPISODES = int(float(params['eval_episodes']))
 BNORM = bool(params['bnorm'])
 SAVE_BEST = bool(params['save_best'])
+LEARN_FREQ = int(float(params['learn_freq']))
+PERFORMANCE_TH = float(params['performance_th'])
 
 # %%
 env = gym.make(ENVIRONMENT)
@@ -61,18 +63,27 @@ ddpg = DDPG(env, buffer, actor_model, critic_model,
 # ddpg.load_critic_weights(f"agents/critic_ddpg-{problem}.hdf5")
 # %%
 
+# time the training
+
+start = time.time()
+
 hist = ddpg.fit(int(N_TRAINING_STEPS), warm_up=WARM_UP_STEPS,
                 clip_grad=CLIP_GRADIENTS, log_freq=LOG_FREQ,
-                eval_episodes=EVAL_EPISODES)
+                eval_episodes=EVAL_EPISODES, learn_freq=LEARN_FREQ,
+                performance_th=PERFORMANCE_TH, keep_best=SAVE_BEST)
+end = time.time()
+
+time_taken = end - start
+
 
 if SAVE_BEST:
     ddpg.target_actor.set_weights(ddpg.best_actor_weights)
     ddpg.target_critic.set_weights(ddpg.best_critic_weights)
 
-ret = ddpg.evaluate(2*EVAL_EPISODES, visualize=False)
+ret = ddpg.evaluate(2 * EVAL_EPISODES, visualize=False)
 print("Evaluation:", ret)
 metrics = {'mean_reward': ret[0], 'std_reward': ret[1],
-           'mean_episode_length': ret[2]}
+           'time_taken_to_train_s': time_taken}
 with open(f"evaluation/metrics_ddpg-{ENVIRONMENT}.json", 'w') as f:
     json.dump(metrics, f)
 

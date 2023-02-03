@@ -4,6 +4,7 @@
 import tensorflow as tf
 import numpy as np
 from tqdm.rich import tqdm
+import rich
 import sys
 
 
@@ -38,6 +39,7 @@ class DDPG(object):
         self.critic_loss_list = [0]
         self.best_avg_reward = -np.inf
         self.eval_episodes = None
+        self.hist = {'mean_returns': [], 'std_returns': [], 'mean_lens': []}
 
         if not hasattr(actor, "optimizer"):
             raise ValueError('Actor must have an optimizer')
@@ -133,13 +135,12 @@ class DDPG(object):
         return crt_norm, act_norm, critic_loss, actor_loss
 
     def fit(self, steps, max_steps_per_ep=np.Inf, log_freq=25,
-            warm_up=50, verbose=1, clip_grad=True,
+            warm_up=50, verbose=1, clip_grad=True, learn_freq=1,
             eval_episodes=10, performance_th=np.Inf, grad_norm=5,
             checkpoints=False, checkpoint_path='agents/',
             keep_best: bool = True):
 
         # To store reward history of each episode
-        self.hist = {'mean_returns': [], 'std_returns': [], 'mean_lens': []}
         self.crt_grad_norm_list = [0] + [np.nan for _ in range(log_freq - 1)]
         self.act_grad_norm_list = [0] + [np.nan for _ in range(log_freq - 1)]
         self.actor_loss_list = [0] + [np.nan for _ in range(log_freq - 1)]
@@ -166,20 +167,8 @@ class DDPG(object):
                 if steps_taken >= steps:
                     break
                 self.buffer.record((prev_state, action, reward, state))
-                if steps_taken > warm_up:
-                    state_batch, action_batch, reward_batch, next_state_batch \
-                        = self.buffer.read()
-                    crt_grad_norm, act_grad_norm, crt_loss, act_loss = \
-                        self.sgd_on_batch(state_batch, action_batch,
-                                          reward_batch, next_state_batch,
-                                          clip_grad, grad_norm)
-                    self.manage_optimization_lists(crt_grad_norm,
-                                                   act_grad_norm, crt_loss,
-                                                   act_loss)
-                    self.update_target(self.target_actor.variables,
-                                       self.actor_model.variables, self.tau)
-                    self.update_target(self.target_critic.variables,
-                                       self.critic_model.variables, self.tau)
+                if (steps_taken > warm_up) and (steps_taken % learn_freq == 0):
+                    self.learn(clip_grad, grad_norm)
 
                 prev_state = state
                 if ep_steps > max_steps_per_ep:
@@ -209,6 +198,21 @@ class DDPG(object):
         pbar.close()
         return self.hist
 
+    def learn(self, clip_grad=True, grad_norm=5) -> None:
+        state_batch, action_batch, reward_batch, next_state_batch \
+            = self.buffer.read()
+        crt_grad_norm, act_grad_norm, crt_loss, act_loss = \
+            self.sgd_on_batch(state_batch, action_batch,
+                              reward_batch, next_state_batch,
+                              clip_grad, grad_norm)
+        self.manage_optimization_lists(crt_grad_norm,
+                                       act_grad_norm, crt_loss,
+                                       act_loss)
+        self.update_target(self.target_actor.variables,
+                           self.actor_model.variables, self.tau)
+        self.update_target(self.target_critic.variables,
+                           self.critic_model.variables, self.tau)
+
     def evaluate(self, episodes=5, visualize=False):
         """
         Evaluate a RL agent
@@ -222,7 +226,11 @@ class DDPG(object):
         episode_len_list = []
         if visualize:
             frames = []
-        pbar = tqdm(total=episodes, file=sys.stdout)
+        try:
+            pbar = tqdm(total=episodes)
+        except rich.errors.LiveError:
+            pbar = tqdm(total=episodes, disable=True)
+        print("Evaluating policy...")
         for _ in range(episodes):
             episode_rewards = []
             steps = 0

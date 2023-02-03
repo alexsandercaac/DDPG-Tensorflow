@@ -4,11 +4,11 @@ stages:
     cmd: python3 src/gym_test.py
     deps:
     - path: src/agents/ddpg.py
-      md5: b29e36056fc03739408fd339c9d44f0b
-      size: 12438
+      md5: d70c23bca4dc9b223d15ff3c5210127e
+      size: 12593
     - path: src/gym_test.py
-      md5: 7754b2af2c33d82991dfc665421c83aa
-      size: 2936
+      md5: db5b4c6574f86fd0f00ebe4fd46da838
+      size: 3228
     - path: src/utils/action_noise.py
       md5: 2dcad8ca3d471886a471755affe96256
       size: 2506
@@ -28,30 +28,32 @@ stages:
         gym_test.critic_lr: 0.0006
         gym_test.environment: Pendulum-v1
         gym_test.eval_episodes: 30
-        gym_test.log_freq: 10
-        gym_test.n_training_steps: 80000
+        gym_test.learn_freq: 2
+        gym_test.log_freq: 25
+        gym_test.n_training_steps: 500000
+        gym_test.performance_th: -180
         gym_test.save_models: true
         gym_test.sigma: 0.2
         gym_test.tau: 0.003
         gym_test.warm_up_steps: 1000
     outs:
     - path: evaluation/metrics_ddpg-Pendulum-v1.json
-      md5: f8f054ff18b775b3eada0dcbcab6745a
-      size: 98
+      md5: 05f5237b93a34427da93536a7d32b45f
+      size: 114
     - path: models/actor_ddpg-Pendulum-v1.hdf5
-      md5: 4f438174bb6e813f621657c529283cec
+      md5: e3a73de1671e8f6a33a1dce3d4dfdd31
       size: 97912
     - path: models/critic_ddpg-Pendulum-v1.hdf5
-      md5: 4e4e85d790eaa96bb1a2846c00869cfa
+      md5: 7a6a7a951c821ed05a44201c150c4d12
       size: 171848
   render:
     cmd: python3 src/render.py
     deps:
     - path: models/actor_ddpg-Pendulum-v1.hdf5
-      md5: 4f438174bb6e813f621657c529283cec
+      md5: e3a73de1671e8f6a33a1dce3d4dfdd31
       size: 97912
     - path: models/critic_ddpg-Pendulum-v1.hdf5
-      md5: 4e4e85d790eaa96bb1a2846c00869cfa
+      md5: 7a6a7a951c821ed05a44201c150c4d12
       size: 171848
     - path: src/render.py
       md5: de2bffb05f97ef82f9cdd6ea4b0a0857
@@ -65,5 +67,38 @@ stages:
         gym_test.environment: Pendulum-v1
     outs:
     - path: evaluation/Pendulum-v1.gif
-      md5: b1b941dc8e5ecc007d17ff70f9b91fbb
-      size: 232035
+      md5: 79bb228e35e561f568c8fe6fb4305934
+      size: 218690
+  baseline:
+    cmd: python3 src/baseline.py
+    deps:
+    - path: src/baseline.py
+      md5: e54f22fdc54a92099638681baa6e9f41
+      size: 2205
+    - path: src/utils/action_noise.py
+      md5: 2dcad8ca3d471886a471755affe96256
+      size: 2506
+    - path: src/utils/params.py
+      md5: 366f78eefab4288274c844409ad5c3b6
+      size: 853
+    params:
+      params.yaml:
+        baseline.batch_size: 64
+        baseline.buffer_capacity: 40000.0
+        baseline.environment: Pendulum-v1
+        baseline.eval_episodes: 30
+        baseline.learn_freq: 2
+        baseline.log_freq: 25
+        baseline.lr: 0.0001
+        baseline.n_training_steps: 500000
+        baseline.save_models: true
+        baseline.sigma: 0.2
+        baseline.tau: 0.003
+        baseline.warm_up_steps: 1000
+    outs:
+    - path: evaluation/metrics_ddpg-Pendulum-v1-baseline.json
+      md5: 1d9d1208d5217d3014dc44ee1def9c0e
+      size: 114
+    - path: models/ddpg-Pendulum-v1-baseline.zip
+      md5: 8aefc4aad7b3505c44718784addfe6c2
+      size: 3954020
