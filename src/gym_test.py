@@ -3,7 +3,7 @@
 """
 # %%
 from agents.ddpg import DDPG
-from utils.anns import actor_bnorm, critic_bnorm, actor, critic
+from utils.anns import actor, critic
 from utils.action_noise import OUActionNoise
 from utils.buffer import Buffer
 from utils.params import get_params
@@ -28,7 +28,6 @@ WARM_UP_STEPS = int(float(params['warm_up_steps']))
 CLIP_GRADIENTS = bool(params['clip_gradients'])
 LOG_FREQ = int(float(params['log_freq']))
 EVAL_EPISODES = int(float(params['eval_episodes']))
-BNORM = bool(params['bnorm'])
 SAVE_BEST = bool(params['save_best'])
 LEARN_FREQ = int(float(params['learn_freq']))
 PERFORMANCE_TH = float(params['performance_th'])
@@ -46,12 +45,8 @@ lower_bound = env.action_space.low[0]
 
 print(f"Max, min value of action ->  {upper_bound}, {lower_bound}")
 
-if BNORM:
-    actor_model = actor_bnorm(num_states, num_actions, ACTOR_LR)
-    critic_model = critic_bnorm(num_states, num_actions, CRITIC_LR)
-else:
-    actor_model = actor(num_states, num_actions, ACTOR_LR)
-    critic_model = critic(num_states, num_actions, CRITIC_LR)
+actor_model = actor(num_states, num_actions, ACTOR_LR)
+critic_model = critic(num_states, num_actions, CRITIC_LR)
 
 buffer = Buffer(num_states, num_actions, batch_size=BATCH_SIZE,
                 buffer_capacity=int(BUFFER_CAPACITY))
@@ -59,11 +54,8 @@ noise = OUActionNoise(mean=np.zeros(num_actions),
                       sigma=float(SIGMA) * np.ones(num_actions))
 ddpg = DDPG(env, buffer, actor_model, critic_model,
             act_noise=noise, tau=TAU)
-# ddpg.load_actor_weights(f"agents/actor_ddpg-{problem}.hdf5")
-# ddpg.load_critic_weights(f"agents/critic_ddpg-{problem}.hdf5")
-# %%
 
-# time the training
+# %%
 
 start = time.time()
 

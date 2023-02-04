@@ -24,7 +24,6 @@ stages:
     - gym_test.clip_gradients
     - gym_test.log_freq
     - gym_test.eval_episodes
-    - gym_test.bnorm
     - gym_test.learn_freq
     - gym_test.performance_th
     metrics:

@@ -12,7 +12,6 @@ gym_test:
   clip_gradients: False
   log_freq: 25
   eval_episodes: 30
-  bnorm: True
   save_best: False
   learn_freq: 2
   performance_th: -180
