@@ -30,3 +30,6 @@ baseline:
   eval_episodes: 30
   warm_up_steps: 1000
   learn_freq: 2
+
+render:
+  episodes: 5

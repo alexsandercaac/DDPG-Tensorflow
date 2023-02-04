@@ -15,6 +15,8 @@ import numpy as np
 params = get_params('gym_test')
 ENVIRONMENT = str(params['environment'])
 BNORM = bool(params['bnorm'])
+params = get_params()
+EPISODES = params['episodes']
 
 # %%
 
@@ -46,4 +48,11 @@ ddpg.load_critic_weights(f"models/critic_ddpg-{ENVIRONMENT}.hdf5")
 # %%
 
 _, _, _, frames = ddpg.evaluate(1, visualize=True)
+
 save_frames_as_gif(frames, path='evaluation', filename=f'{ENVIRONMENT}.gif')
+
+# %%
+
+ddpg.env = gym.make(ENVIRONMENT, render_mode='human')
+a = ddpg.evaluate(EPISODES)
+print(a)

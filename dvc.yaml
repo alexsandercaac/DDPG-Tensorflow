@@ -43,6 +43,7 @@ stages:
     params:
     - gym_test.bnorm
     - gym_test.environment
+    - render.episodes
   baseline:
     cmd: python3 src/baseline.py
     deps: 

@@ -56,8 +56,8 @@ stages:
       md5: 7a6a7a951c821ed05a44201c150c4d12
       size: 171848
     - path: src/render.py
-      md5: de2bffb05f97ef82f9cdd6ea4b0a0857
-      size: 1533
+      md5: 5702a881d8147cb5b5ce7856589b8d66
+      size: 1684
     - path: src/utils/visualization.py
       md5: deb5dd028b4e8b128215a2d7993f10df
       size: 965
@@ -65,10 +65,11 @@ stages:
       params.yaml:
         gym_test.bnorm: true
         gym_test.environment: Pendulum-v1
+        render.episodes: 5
     outs:
     - path: evaluation/Pendulum-v1.gif
-      md5: 79bb228e35e561f568c8fe6fb4305934
-      size: 218690
+      md5: ed3a0fcc09c45189e2b47cb8a8526331
+      size: 257645
   baseline:
     cmd: python3 src/baseline.py
     deps:
