@@ -9,7 +9,7 @@ gym_test:
   tau: 3e-3
   n_training_steps: 500000
   warm_up_steps: 1000
-  clip_gradients: True
+  clip_gradients: False
   log_freq: 25
   eval_episodes: 30
   bnorm: True
