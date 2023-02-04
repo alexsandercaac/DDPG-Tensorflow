@@ -103,3 +103,27 @@ stages:
     - path: models/ddpg-Pendulum-v1-baseline.zip
       md5: 8aefc4aad7b3505c44718784addfe6c2
       size: 3954020
+  render_baseline:
+    cmd: python3 src/render_baseline.py
+    deps:
+    - path: models/ddpg-Pendulum-v1-baseline.zip
+      md5: 8aefc4aad7b3505c44718784addfe6c2
+      size: 3954020
+    - path: src/render_baseline.py
+      md5: 9a7cbd182fa1425e4324d4e5215df610
+      size: 846
+    - path: src/utils/evaluation.py
+      md5: 2c8bc428231a9a1792e6cd6ac485fb85
+      size: 2364
+    - path: src/utils/visualization.py
+      md5: deb5dd028b4e8b128215a2d7993f10df
+      size: 965
+    params:
+      params.yaml:
+        gym_test.bnorm: true
+        gym_test.environment: Pendulum-v1
+        render_baseline.episodes: 5
+    outs:
+    - path: evaluation/Pendulum-v1-baseline.gif
+      md5: b82022f79a761f5bed40b352ae410ac5
+      size: 404564

@@ -68,3 +68,17 @@ stages:
     metrics:
     - evaluation/metrics_ddpg-${gym_test.environment}-baseline.json:
         cache: False
+  render_baseline:
+    cmd: python3 src/render_baseline.py
+    deps:
+    - src/render_baseline.py
+    - src/utils/evaluation.py
+    - models/ddpg-${gym_test.environment}-baseline.zip
+    - src/utils/visualization.py
+    plots:
+    - evaluation/${gym_test.environment}-baseline.gif:
+        cache: false
+    params:
+    - gym_test.bnorm
+    - gym_test.environment
+    - render_baseline.episodes
