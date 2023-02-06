@@ -2,6 +2,7 @@
     Implementation of Deep Deterministic Policy Gradient (DDPG) using
     Tensorflow 2.0 and Keras.
 """
+from typing import Tuple
 import tensorflow as tf
 import numpy as np
 from tqdm.rich import tqdm
@@ -40,6 +41,8 @@ class DDPG(object):
         self.best_avg_reward = -np.inf
         self.eval_episodes = None
         self.hist = {'mean_returns': [], 'std_returns': [], 'mean_lens': []}
+        self.clip_grad = None
+        self.grad_norm = None
 
         if not hasattr(actor, "optimizer"):
             raise ValueError('Actor must have an optimizer')
@@ -104,7 +107,7 @@ class DDPG(object):
 
     @tf.function
     def sgd_on_batch(self, state_batch, action_batch, reward_batch,
-                     next_state_batch, clip_grad, grad_norm):
+                     next_state_batch):
         """
             Perform a single step of gradient descent on a batch of data.
 
@@ -129,15 +132,16 @@ class DDPG(object):
                 [state_batch, action_batch], training=True)
             critic_loss = tf.math.reduce_mean(tf.math.square(y - critic_value))
         # The critic loss is calculated using the target networks and Bellman
-        # equation.
+        # equation. This is called the mean-squared Bellman error (MSBE)
+        # function.
         critic_grad = tape.gradient(
             critic_loss, self.critic_model.trainable_variables)
 
         # Clip the gradient if necessary. We also calculate the gradient norm
         # for logging purposes.
-        if clip_grad:
+        if self.clip_grad:
             critic_grad, crt_norm = tf.clip_by_global_norm(critic_grad,
-                                                           grad_norm)
+                                                           self.grad_norm)
         else:
             _, crt_norm = tf.clip_by_global_norm(critic_grad, 1)
         self.critic_model.optimizer.apply_gradients(
@@ -156,9 +160,9 @@ class DDPG(object):
 
         actor_grad = tape.gradient(
             actor_loss, self.actor_model.trainable_variables)
-        if clip_grad:
+        if self.clip_grad:
             actor_grad, act_norm = tf.clip_by_global_norm(actor_grad,
-                                                          grad_norm)
+                                                          self.grad_norm)
         else:
             _, act_norm = tf.clip_by_global_norm(actor_grad, 1)
         self.actor_model.optimizer.apply_gradients(
@@ -193,18 +197,26 @@ class DDPG(object):
                 agent. If the agent's performance is above this threshold,
                 the training is stopped.
             grad_norm (float): gradient norm to clip to.
-            checkpoints (bool): whether or not to save checkpoints.
+            checkpoints (bool): whether or not to save checkpoints for the best
+                models.
             checkpoint_path (str): path to save checkpoints.
             keep_best (bool): whether or not to keep the best performing
                 model. If true, the best performing model is restored.
         """
-        # To store reward history of each episode
+
+        self.clip_grad = clip_grad
+        self.grad_norm = grad_norm
+
+        # To store reward history of each episode. Each list is large enough
+        # to record information from all episodes within the interval of
+        # logging.
         self.crt_grad_norm_list = [0] + [np.nan for _ in range(log_freq - 1)]
         self.act_grad_norm_list = [0] + [np.nan for _ in range(log_freq - 1)]
         self.actor_loss_list = [0] + [np.nan for _ in range(log_freq - 1)]
         self.critic_loss_list = [0] + [np.nan for _ in range(log_freq - 1)]
         self.eval_episodes = eval_episodes
 
+        # Steps taken considering all episodes.
         steps_taken = 0
         episode = 0
         pbar = tqdm(total=steps)
@@ -216,7 +228,9 @@ class DDPG(object):
             while not done:
 
                 action = self.policy(prev_state)
-
+                # Terminated is true if the episode ends naturally, while
+                # truncated is true if the episode is truncated due to
+                # max_steps_per_ep.
                 state, reward, terminated, truncated, _ = self.env.step(action)
                 done = terminated or truncated
                 steps_taken += 1
@@ -226,7 +240,7 @@ class DDPG(object):
                     break
                 self.buffer.record((prev_state, action, reward, state))
                 if (steps_taken > warm_up) and (steps_taken % learn_freq == 0):
-                    self.learn(clip_grad, grad_norm)
+                    self.learn()
 
                 prev_state = state
                 if ep_steps > max_steps_per_ep:
@@ -238,33 +252,41 @@ class DDPG(object):
                 if verbose > 0:
                     print(f"\nEpisode: {episode}")
                 score = self.log_optimization_info(verbose)
+                # Update the best actor and critic weights if the score is
+                # better than the best score.
                 if score >= self.best_avg_reward:
                     self.best_avg_reward = score
                     self.best_actor_weights = self.target_actor.get_weights()
                     self.best_critic_weights = self.target_critic.get_weights()
 
-                if checkpoints:
-                    self.save_actor_weights(checkpoint_path +
-                                            "checkpoint_actor.hdf5")
-                    self.save_critic_weights(checkpoint_path +
-                                             "checkpoint_critic.hdf5")
+                    if checkpoints:
+                        self.save_actor_weights(checkpoint_path +
+                                                "checkpoint_actor.hdf5")
+                        self.save_critic_weights(checkpoint_path +
+                                                 "checkpoint_critic.hdf5")
                 if score > performance_th:
                     if verbose > 0:
                         print("\nPerformance goal reached!! :)")
                     break
+        # Restore the best actor and critic weights.
         if keep_best:
             self.target_actor.set_weights(self.best_actor_weights)
             self.target_critic.set_weights(self.best_critic_weights)
         pbar.close()
         return self.hist
 
-    def learn(self, clip_grad=True, grad_norm=5) -> None:
+    def learn(self) -> None:
+        """
+            Apply SGD to a batch of experiences.
+        """
         state_batch, action_batch, reward_batch, next_state_batch \
             = self.buffer.read()
         crt_grad_norm, act_grad_norm, crt_loss, act_loss = \
             self.sgd_on_batch(state_batch, action_batch,
                               reward_batch, next_state_batch,
-                              clip_grad, grad_norm)
+                              self.clip_grad, self.grad_norm)
+        # Update the lists for logging. Only the last log_freq values are
+        # stored.
         self.manage_optimization_lists(crt_grad_norm,
                                        act_grad_norm, crt_loss,
                                        act_loss)
@@ -273,14 +295,20 @@ class DDPG(object):
         self.update_target(self.target_critic.variables,
                            self.critic_model.variables, self.tau)
 
-    def evaluate(self, episodes=5, visualize=False):
+    def evaluate(self, episodes: int = 5, visualize: bool = False,
+                 verbose: bool = True) -> Tuple[float, float, float]:
         """
-        Evaluate a RL agent
-        :param model: (BaseRLModel object) the RL Agent
-        :param num_episodes: (int) number of episodes to evaluate it
-        :return: (float) Mean reward for the last num_episodes
+        Evaluate a RL agent. This function is not adapted to multiple envs.
+
+        Args:
+
+        model: (policy function) the RL Agent
+        episodes: (int) number of episodes to evaluate
+        visualize: (bool) whether or not to visualize the episodes by returning
+            a list of frames.
+
+        return: (float) Mean reward, standard deviation and episode length
         """
-        # This function will only work for a single Environment
 
         episode_rewards_list = []
         episode_len_list = []
@@ -290,7 +318,8 @@ class DDPG(object):
             pbar = tqdm(total=episodes)
         except rich.errors.LiveError:
             pbar = tqdm(total=episodes, disable=True)
-        print("Evaluating policy...")
+        if verbose:
+            print("Evaluating policy...")
         for _ in range(episodes):
             episode_rewards = []
             steps = 0
@@ -323,7 +352,9 @@ class DDPG(object):
 
     def manage_optimization_lists(self, crt_grad_norm, act_grad_norm, crt_loss,
                                   act_loss):
-
+        """
+        Update the lists for logging. Only the last log_freq values are stored.
+        """
         self.crt_grad_norm_list.append(crt_grad_norm)
         self.crt_grad_norm_list.pop(0)
         self.act_grad_norm_list.append(act_grad_norm)
@@ -334,6 +365,10 @@ class DDPG(object):
         self.actor_loss_list.pop(0)
 
     def log_optimization_info(self, verbose):
+        """
+        Evaluate the agent, log the optimization info and print it if verbose
+        is true.
+        """
         mean_return, std_return, mean_len = self.evaluate(
             self.eval_episodes)
         mean_crt_grad = np.nanmean(self.crt_grad_norm_list)
