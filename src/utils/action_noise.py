@@ -87,3 +87,30 @@ class OUActionNoise(ActionNoise):
     def __repr__(self) -> str:
         return (f"OrnsteinUhlenbeckActionNoise(mu={self._mu}, " +
                 f"sigma={self._sigma})")
+
+
+class GaussianActionNoise(ActionNoise):
+    """
+        Class for uncorrelated Gaussian action noise
+
+        Args:
+
+        mean (ndarray): the mean of the noise
+        sigma (ndarray): the scale of the noise
+    """
+    def __init__(self, mean: np.ndarray, sigma: np.ndarray):
+
+        self._mu = mean
+        self._sigma = sigma
+        super(GaussianActionNoise, self).__init__()
+
+    def __call__(self) -> np.ndarray:
+
+        noise = np.random.normal(loc=self._mu, scale=self._sigma,
+                                 size=self._mu.shape)
+
+        return noise
+
+    def __repr__(self) -> str:
+        return (f"GaussianActionNoise(mu={self._mu}," +
+                f"sigma={self._sigma})")
