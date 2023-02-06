@@ -11,6 +11,7 @@ import gymnasium as gym
 import numpy as np
 import json
 import time
+import plotly.graph_objects as go
 # %% Parameters
 
 params = get_params()
@@ -64,13 +65,21 @@ hist = ddpg.fit(int(N_TRAINING_STEPS), warm_up=WARM_UP_STEPS,
                 eval_episodes=EVAL_EPISODES, learn_freq=LEARN_FREQ,
                 performance_th=PERFORMANCE_TH, keep_best=SAVE_BEST)
 end = time.time()
-
 time_taken = end - start
 
+episodes = LOG_FREQ * np.arange(1, len(hist['mean_returns']) + 1)
 
-if SAVE_BEST:
-    ddpg.target_actor.set_weights(ddpg.best_actor_weights)
-    ddpg.target_critic.set_weights(ddpg.best_critic_weights)
+fig = go.Figure()
+fig.add_trace(go.Scatter(x=episodes, y=hist['mean_returns'],
+                         mode='lines',
+                         name='mean_reward'))
+# change x and y labels
+fig.update_xaxes(title_text='Episodes')
+fig.update_yaxes(title_text='Mean reward')
+# update ticks to match episodes
+fig.update_xaxes(tickvals=episodes)
+
+fig.write_image(f"evaluation/{ENVIRONMENT}-learning_curve.png")
 
 ret = ddpg.evaluate(2 * EVAL_EPISODES, visualize=False)
 print("Evaluation:", ret)
@@ -85,3 +94,5 @@ ddpg.evaluate(2, visualize=True)
 if SAVE_MODELS:
     ddpg.save_actor_weights(f"models/actor_ddpg-{ENVIRONMENT}.hdf5")
     ddpg.save_critic_weights(f"models/critic_ddpg-{ENVIRONMENT}.hdf5")
+
+# %%

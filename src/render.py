@@ -3,7 +3,7 @@
 """
 
 from agents.ddpg import DDPG
-from utils.anns import actor_bnorm, critic_bnorm, actor, critic
+from utils.anns import actor, critic
 from utils.action_noise import OUActionNoise
 from utils.buffer import Buffer
 from utils.params import get_params
@@ -14,7 +14,6 @@ import numpy as np
 
 params = get_params('gym_test')
 ENVIRONMENT = str(params['environment'])
-BNORM = bool(params['bnorm'])
 params = get_params()
 EPISODES = params['episodes']
 
@@ -28,12 +27,9 @@ num_actions = env.action_space.shape[0]
 upper_bound = env.action_space.high[0]
 lower_bound = env.action_space.low[0]
 
-if BNORM:
-    actor_model = actor_bnorm(num_states, num_actions, 1e-3)
-    critic_model = critic_bnorm(num_states, num_actions, 1e-3)
-else:
-    actor_model = actor(num_states, num_actions, 1e-3)
-    critic_model = critic(num_states, num_actions, 1e-3)
+
+actor_model = actor(num_states, num_actions, 1e-3)
+critic_model = critic(num_states, num_actions, 1e-3)
 
 buffer = Buffer(num_states, num_actions, batch_size=32,
                 buffer_capacity=int(1024))

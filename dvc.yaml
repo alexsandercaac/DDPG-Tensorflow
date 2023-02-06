@@ -29,6 +29,9 @@ stages:
     metrics:
     - evaluation/metrics_ddpg-${gym_test.environment}.json:
         cache: False
+    plots:
+    - evaluation/${gym_test.environment}-learning_curve.png:
+        cache: false
   render:
     cmd: python3 src/render.py
     deps:
@@ -40,7 +43,6 @@ stages:
     - evaluation/${gym_test.environment}.gif:
         cache: false
     params:
-    - gym_test.bnorm
     - gym_test.environment
     - render.episodes
   baseline:
@@ -78,6 +80,5 @@ stages:
     - evaluation/${gym_test.environment}-baseline.gif:
         cache: false
     params:
-    - gym_test.bnorm
     - gym_test.environment
     - render_baseline.episodes

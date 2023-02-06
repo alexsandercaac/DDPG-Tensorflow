@@ -1,7 +1,7 @@
 gym_test:
   environment: "Pendulum-v1"
-  critic_lr: 6e-4
-  actor_lr: 2e-4
+  critic_lr: 5e-4
+  actor_lr: 1e-4
   save_models: True
   batch_size: 64
   buffer_capacity: 40e3
@@ -11,10 +11,10 @@ gym_test:
   warm_up_steps: 1000
   clip_gradients: False
   log_freq: 25
-  eval_episodes: 30
+  eval_episodes: 25
   save_best: False
   learn_freq: 2
-  performance_th: -180
+  performance_th: -170
 
 baseline:
   environment: "Pendulum-v1"
