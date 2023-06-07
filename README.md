@@ -23,3 +23,16 @@ The `src` folder contains the Python modules that are used to construct the DVC 
 - `action_noise.py`: contains different classes that implement various noise generating processes that are used to add noise to the actions of the agent. The file is located in the `src/utils` folder.
 - `buffer.py`: contains the replay buffer class that is used to store the agent's experience. The file is located in the `src/utils` folder.
 - `anns.py`: contains the neural network classes that are used to construct the policy and Q-function networks. The file is located in the `src/utils` folder.
+
+Instructions 📄
+--------------------
+
+#### DVC
+
+The experiments in this repository were tracked using a tool called [DVC](https://github.com/iterative/dvc), which is a command line tool for the development of reproducible machine learning projects.
+
+With DVC, data and artifacts from experiments can be tracked both locally and remotely. For this repository, the cache with the full history of development is made available for public use with read-only access. This remote is already configured by default in the `.dvc/config` file, and will allow you to download all of the models and artifacts generated in the development of this project.
+
+If you would like access to a remote repository with writing access, however, you will need to create your own. Instructions for that can be found in the [DVC website](https://dvc.org/doc/user-guide/data-management/remote-storage).
+
+
