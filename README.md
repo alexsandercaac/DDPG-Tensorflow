@@ -31,7 +31,7 @@ Instructions 📄
 
 The experiments in this repository were tracked using a tool called [DVC](https://github.com/iterative/dvc), which is a command line tool for the development of reproducible machine learning projects.
 
-With DVC, data and artifacts from experiments can be tracked both locally and remotely. For this repository, the cache with the full history of development is made available for public use with read-only access. This remote is already configured by default in the `.dvc/config` file, and will allow you to download all of the models and artifacts generated in the development of this project.
+With DVC, data and artifacts from experiments can be tracked both locally and remotely. For this repository, the cache with the full history of development is made available for public use with read-only access. This remote is already configured by default in the `.dvc/config` file, and will allow you to download all of the models and artifacts generated in the development of this project. **Note:** you may be ask to authenticate your identity with gdrive, and give DVC permissions --- since the data is public, any account will give you access to the repo. 
 
 If you would like access to a remote repository with writing access, however, you will need to create your own. Instructions for that can be found in the [DVC website](https://dvc.org/doc/user-guide/data-management/remote-storage).
 
